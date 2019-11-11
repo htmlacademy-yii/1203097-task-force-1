@@ -1,7 +1,7 @@
 # Личный проект «TaskForce»
 
 * Студент: [Sergey Komarov](https://up.htmlacademy.ru/yii/1/user/1203097).
-* Наставник: `Коллективный Разум`.
+* Наставник: [Igor Deyashkin](https://htmlacademy.ru/profile/id1098723).
 
 ---
 
