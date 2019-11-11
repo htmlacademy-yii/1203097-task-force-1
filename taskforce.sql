@@ -7,7 +7,7 @@
 #
 # Host: localhost (MySQL 5.7.27)
 # Database: taskforce
-# Generation Time: 2019-11-11 09:25:48 +0000
+# Generation Time: 2019-11-11 16:57:22 +0000
 # ************************************************************
 
 
@@ -60,7 +60,7 @@ DROP TABLE IF EXISTS `cities`;
 
 CREATE TABLE `cities` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `city_name` varchar(255) NOT NULL DEFAULT '',
+  `city_name` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -73,7 +73,7 @@ DROP TABLE IF EXISTS `notifications`;
 
 CREATE TABLE `notifications` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `type` enum('newMessage','newResponse','taskFinished','taskStarted','taskRefused') DEFAULT NULL,
+  `type` enum('newMessage','newResponse','taskFinished','taskStarted','taskRefused') NOT NULL,
   `user_id` int(11) unsigned NOT NULL,
   `text` text NOT NULL,
   PRIMARY KEY (`id`),
@@ -137,7 +137,7 @@ DROP TABLE IF EXISTS `task_files`;
 CREATE TABLE `task_files` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `task_id` int(11) unsigned NOT NULL,
-  `file` varchar(255) NOT NULL DEFAULT '',
+  `file` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `task_id` (`task_id`),
   CONSTRAINT `task_files_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON UPDATE CASCADE
@@ -152,10 +152,10 @@ DROP TABLE IF EXISTS `tasks`;
 
 CREATE TABLE `tasks` (
   `id` int(11) unsigned NOT NULL,
-  `status` enum('new','processing','cancelled','completed','failed') DEFAULT NULL,
+  `status` enum('new','processing','cancelled','completed','failed') NOT NULL,
   `owner_user_id` int(11) unsigned NOT NULL,
   `performer_user_id` int(11) unsigned DEFAULT NULL,
-  `name` varchar(255) NOT NULL DEFAULT '',
+  `name` varchar(255) NOT NULL,
   `description` text NOT NULL,
   `category_id` int(11) unsigned NOT NULL,
   `city_id` int(11) unsigned DEFAULT NULL,
@@ -185,8 +185,8 @@ DROP TABLE IF EXISTS `user_categories`;
 
 CREATE TABLE `user_categories` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) unsigned DEFAULT NULL,
-  `category_id` int(11) unsigned DEFAULT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `category_id` int(11) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `category_id` (`category_id`),
   KEY `user_id` (`user_id`),
@@ -222,7 +222,7 @@ DROP TABLE IF EXISTS `user_job_photos`;
 CREATE TABLE `user_job_photos` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL,
-  `photo` varchar(255) NOT NULL DEFAULT '',
+  `photo` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `user_job_photos_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
@@ -237,8 +237,8 @@ DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `email` varchar(255) NOT NULL DEFAULT '',
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
   `address` varchar(255) DEFAULT NULL,
   `birthday` date DEFAULT NULL,
   `information` text,
