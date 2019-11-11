@@ -7,7 +7,7 @@
 #
 # Host: localhost (MySQL 5.7.27)
 # Database: taskforce
-# Generation Time: 2019-11-08 12:44:36 +0000
+# Generation Time: 2019-11-11 09:25:48 +0000
 # ************************************************************
 
 
@@ -33,17 +33,22 @@ CREATE TABLE `categories` (
 
 
 
-# Dump of table chat
+# Dump of table chat_messages
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `chat`;
+DROP TABLE IF EXISTS `chat_messages`;
 
-CREATE TABLE `chat` (
+CREATE TABLE `chat_messages` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `task_id` int(11) unsigned DEFAULT NULL,
-  `user_id` int(11) unsigned DEFAULT NULL,
-  `message` text,
-  PRIMARY KEY (`id`)
+  `task_id` int(11) unsigned NOT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `message` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `task_id` (`task_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `chat_messages_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -55,7 +60,7 @@ DROP TABLE IF EXISTS `cities`;
 
 CREATE TABLE `cities` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `city` char(255) NOT NULL DEFAULT '',
+  `city_name` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -68,10 +73,12 @@ DROP TABLE IF EXISTS `notifications`;
 
 CREATE TABLE `notifications` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `type` int(11) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `text` text,
-  PRIMARY KEY (`id`)
+  `type` enum('newMessage','newResponse','taskFinished','taskStarted','taskRefused') DEFAULT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `text` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -83,9 +90,16 @@ DROP TABLE IF EXISTS `responses`;
 
 CREATE TABLE `responses` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `task_id` int(11) unsigned DEFAULT NULL,
-  `user_id` int(11) unsigned DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `task_id` int(11) unsigned NOT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `price` int(11) unsigned NOT NULL,
+  `comment` text NOT NULL,
+  `is_rejected` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `task_id` (`task_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `responses_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `responses_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -97,16 +111,20 @@ DROP TABLE IF EXISTS `reviews`;
 
 CREATE TABLE `reviews` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `task_id` int(11) unsigned DEFAULT NULL,
-  `owner_id` int(11) unsigned DEFAULT NULL,
-  `performer_id` int(11) unsigned DEFAULT NULL,
+  `task_id` int(11) unsigned NOT NULL,
+  `owner_id` int(11) unsigned NOT NULL,
+  `performer_id` int(11) unsigned NOT NULL,
   `message` text,
-  `score` tinyint(1) DEFAULT NULL,
-  `task_completed` tinyint(1) DEFAULT NULL,
+  `score` tinyint(1) unsigned DEFAULT NULL,
+  `task_completed` tinyint(1) unsigned NOT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `task_id` (`task_id`),
-  CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `owner_id` (`owner_id`),
+  KEY `performer_id` (`performer_id`),
+  CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `reviews_ibfk_3` FOREIGN KEY (`performer_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -119,10 +137,10 @@ DROP TABLE IF EXISTS `task_files`;
 CREATE TABLE `task_files` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `task_id` int(11) unsigned NOT NULL,
-  `file` char(255) NOT NULL DEFAULT '',
+  `file` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `task_id` (`task_id`),
-  CONSTRAINT `task_files_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `task_files_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -135,9 +153,9 @@ DROP TABLE IF EXISTS `tasks`;
 CREATE TABLE `tasks` (
   `id` int(11) unsigned NOT NULL,
   `status` enum('new','processing','cancelled','completed','failed') DEFAULT NULL,
-  `ownerId` int(11) DEFAULT NULL,
-  `performerId` int(11) DEFAULT NULL,
-  `name` char(255) NOT NULL DEFAULT '',
+  `owner_user_id` int(11) unsigned NOT NULL,
+  `performer_user_id` int(11) unsigned DEFAULT NULL,
+  `name` varchar(255) NOT NULL DEFAULT '',
   `description` text NOT NULL,
   `category_id` int(11) unsigned NOT NULL,
   `city_id` int(11) unsigned DEFAULT NULL,
@@ -150,8 +168,12 @@ CREATE TABLE `tasks` (
   PRIMARY KEY (`id`),
   KEY `category_id` (`category_id`),
   KEY `city_id` (`city_id`),
-  CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `owner_user_id` (`owner_user_id`),
+  KEY `performer_user_id` (`performer_user_id`),
+  CONSTRAINT `tasks_ibfk_3` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `tasks_ibfk_4` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `tasks_ibfk_5` FOREIGN KEY (`owner_user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `tasks_ibfk_6` FOREIGN KEY (`performer_user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -168,8 +190,8 @@ CREATE TABLE `user_categories` (
   PRIMARY KEY (`id`),
   KEY `category_id` (`category_id`),
   KEY `user_id` (`user_id`),
-  CONSTRAINT `user_categories_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `user_categories_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `user_categories_ibfk_3` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `user_categories_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -181,9 +203,13 @@ DROP TABLE IF EXISTS `user_favorites`;
 
 CREATE TABLE `user_favorites` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) unsigned DEFAULT NULL,
-  `favorite_id` int(11) unsigned DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `user_id` int(11) unsigned NOT NULL,
+  `favorite_user_id` int(11) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `favorite_user_id` (`favorite_user_id`),
+  CONSTRAINT `user_favorites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `user_favorites_ibfk_2` FOREIGN KEY (`favorite_user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -195,30 +221,11 @@ DROP TABLE IF EXISTS `user_job_photos`;
 
 CREATE TABLE `user_job_photos` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) unsigned DEFAULT NULL,
-  `photo` char(255) DEFAULT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `photo` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
-  CONSTRAINT `user_job_photos_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
-# Dump of table user_settings
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `user_settings`;
-
-CREATE TABLE `user_settings` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) unsigned DEFAULT NULL,
-  `notify_new_message` tinyint(1) NOT NULL DEFAULT '1',
-  `notify_task_action` tinyint(1) NOT NULL DEFAULT '1',
-  `notify_new_review` tinyint(1) NOT NULL DEFAULT '1',
-  `is_hidden` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `user_id` (`user_id`),
-  CONSTRAINT `user_settings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `user_job_photos_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -230,14 +237,27 @@ DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` char(255) DEFAULT NULL,
-  `email` char(255) DEFAULT NULL,
-  `address` char(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `email` varchar(255) NOT NULL DEFAULT '',
+  `address` varchar(255) DEFAULT NULL,
   `birthday` date DEFAULT NULL,
   `information` text,
-  `avatar` char(255) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
   `password` text,
-  PRIMARY KEY (`id`)
+  `city_id` int(11) unsigned NOT NULL,
+  `last_online_at` datetime DEFAULT NULL,
+  `notify_new_message` tinyint(1) NOT NULL DEFAULT '1',
+  `notify_task_action` tinyint(1) NOT NULL DEFAULT '1',
+  `notify_new_review` tinyint(1) NOT NULL DEFAULT '1',
+  `is_hidden` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `contact_phone` varchar(255) DEFAULT NULL,
+  `contact_skype` varchar(255) DEFAULT NULL,
+  `contact_other` varchar(255) DEFAULT NULL,
+  `views_count` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `city_id` (`city_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
