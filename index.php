@@ -1,11 +1,18 @@
 <?php
 use TaskForce\Main\Tasks;
+use TaskForce\Actions\AcceptAction;
+use TaskForce\Actions\CancelAction;
+use TaskForce\Actions\FinishAction;
+use TaskForce\Actions\RefuseAction;
+use TaskForce\Actions\RespondAction;
+use TaskForce\Actions\ChatAction;
+
 require_once 'vendor/autoload.php';
 // пример задачи
 $attributes = [
     'taskId' => 1,
     'status' => Tasks::STATUS_NEW,
-    'ownerId' => 2,
+    'ownerId' => 1,
     'performerId' => null,
     'name' => "Сделать сайт",
     'description' => "Сделать простой лендинг",
@@ -18,7 +25,24 @@ $attributes = [
 ];
 $task = Tasks::createTask($attributes);
 //var_dump($task);
-assert($task->getNextStatus(TASKS::ACTION_ACCEPT) == TASKS::STATUS_PROCESSING, 'accept action');
-assert($task->getNextStatus(TASKS::ACTION_CANCEL) == TASKS::STATUS_CANCELLED, 'cancel action');
-assert($task->getNextStatus(TASKS::ACTION_REFUSE) == TASKS::STATUS_FAILED, 'refuse action');
-assert($task->getNextStatus(TASKS::ACTION_FINISH) == TASKS::STATUS_COMPLETED, 'finish action');
+assert($task->getNextStatus(AcceptAction::class) == TASKS::STATUS_PROCESSING, 'accept action');
+assert($task->getNextStatus(CancelAction::class) == TASKS::STATUS_CANCELLED, 'cancel action');
+assert($task->getNextStatus(RefuseAction::class) == TASKS::STATUS_FAILED, 'refuse action');
+assert($task->getNextStatus(FinishAction::class) == TASKS::STATUS_COMPLETED, 'finish action');
+
+//Новая задача, id заказчика 1
+assert($task->getAvailableActions(1, TASKS::ROLE_OWNER) === [TaskForce\Actions\AcceptAction::class, TaskForce\Actions\CancelAction::class], 'Заказчик может отменить или принять');
+assert($task->getAvailableActions(2, TASKS::ROLE_PERFORMER) === [TaskForce\Actions\RespondAction::class], 'Исполнитель может откликнуться');
+assert($task->getAvailableActions(2, TASKS::ROLE_OTHER) === [], 'Другие ничего не могут');
+
+//Задача выполняется, исполнитель id 2
+$task->setStatus(TASKS::STATUS_PROCESSING);
+$task->setPerformerId(2);
+assert($task->getAvailableActions(1, TASKS::ROLE_OWNER) === [TaskForce\Actions\FinishAction::class, TaskForce\Actions\ChatAction::class], 'Заказчику доступны чат и завершение задачи');
+assert($task->getAvailableActions(2, TASKS::ROLE_PERFORMER) === [TaskForce\Actions\RefuseAction::class, TaskForce\Actions\ChatAction::class], 'Исполнителю доступны чат и отказ от задачи');
+
+//Задача провалена
+// TODO: может ли заказчик брать новых исполнителей на проваленные задачи?
+$task->setStatus(TASKS::STATUS_FAILED);
+assert($task->getAvailableActions(1, TASKS::ROLE_OWNER) === [], 'Заказчику ничего недоступно');
+assert($task->getAvailableActions(2, TASKS::ROLE_PERFORMER) === [], 'Исполнителю ничего недоступно');
