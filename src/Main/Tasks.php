@@ -1,6 +1,8 @@
 <?php
 namespace TaskForce\Main;
 
+use TaskForce\Actions;
+
 class Tasks
 {
     const STATUS_NEW = 'new';
@@ -17,47 +19,25 @@ class Tasks
         self::STATUS_FAILED,
     ];
 
-    const ACTION_RESPOND = 'respond';
-    const ACTION_ACCEPT = 'accept';
-    const ACTION_CANCEL = 'cancel';
-    const ACTION_REFUSE = 'refuse';
-    const ACTION_FINISH = 'finish';
-    const ACTION_CHAT = 'chat';
-    const ACTION_ADD = 'add';
-
     const ACTIONS = [
-        self::ACTION_RESPOND,
-        self::ACTION_ACCEPT,
-        self::ACTION_CANCEL,
-        self::ACTION_REFUSE,
-        self::ACTION_FINISH,
-        self::ACTION_CHAT,
-        self::ACTION_ADD,
+        Actions\RespondAction::class,
+        Actions\AcceptAction::class,
+        Actions\CancelAction::class,
+        Actions\RefuseAction::class,
+        Actions\FinishAction::class,
+        Actions\ChatAction::class,
     ];
 
     const ACTION_STATUS_MAP = [
-        self::ACTION_ADD => self::STATUS_NEW,
-        self::ACTION_ACCEPT => self::STATUS_PROCESSING,
-        self::ACTION_CANCEL => self::STATUS_CANCELLED,
-        self::ACTION_REFUSE => self::STATUS_FAILED,
-        self::ACTION_FINISH => self::STATUS_COMPLETED,
-    ];
-
-    const ACTIONS_OWNER_MAP = [
-        self::STATUS_NEW => [self::ACTION_ACCEPT, self::ACTION_CANCEL],
-        self::STATUS_PROCESSING => [self::ACTION_FINISH, self::ACTION_CHAT],
-    ];
-
-    const ACTIONS_PERFORMER_MAP = [
-        self::STATUS_PROCESSING => [self::ACTION_REFUSE, self::ACTION_CHAT],
-    ];
-
-    const ACTIONS_OTHER_MAP = [
-        self::STATUS_NEW => [self::ACTION_RESPOND, self::ACTION_CHAT],
+        Actions\AcceptAction::class => self::STATUS_PROCESSING,
+        Actions\CancelAction::class => self::STATUS_CANCELLED,
+        Actions\RefuseAction::class => self::STATUS_FAILED,
+        Actions\FinishAction::class => self::STATUS_COMPLETED,
     ];
 
     const ROLE_OWNER = 'owner';
     const ROLE_PERFORMER = 'performer';
+    const ROLE_OTHER = 'other';
 
     private $taskId;
     private $status;
@@ -87,6 +67,11 @@ class Tasks
         return $this->status;
     }
 
+    public function setStatus($status): void
+    {
+       $this->status = $status;
+    }
+
     public function getStatuses(): array
     {
         return self::STATUSES;
@@ -97,9 +82,8 @@ class Tasks
         return self::ACTIONS;
     }
 
-    public function getNextStatus(string $action): string
+    public function getNextStatus($action): string
     {
-        // TODO: нет проверок на доступность указанного действия
         if (!in_array($action, $this->getActions())) {
             throw new Exception('unknown action');
         }
@@ -117,9 +101,14 @@ class Tasks
         return $this->ownerId === $userId;
     }
 
-    public function getPerformerId(): int
+    public function getPerformerId(): ?int
     {
         return $this->performerId;
+    }
+
+    public function setPerformerId(int $userId): void
+    {
+        $this->performerId = $userId;
     }
 
     public function isPerformer(int $userId): bool
@@ -127,24 +116,22 @@ class Tasks
         return $this->performerId === $userId;
     }
 
-    public function getAvailableActions(int $userId): ?array
+    public function getAvailableActions(int $userId, string $userRole): array
     {
+        // TODO: $userRole не используется, но требуется в задании
         // TODO: accept должен быть только если есть отклики
         // TODO: добавить проверку что нельзя откликаться несколько раз
-        // TODO: если задание выполняется чат доступен только исполнителю задания?
-        if ($this->isOwner($userId)) {
-            return self::ACTIONS_OWNER_MAP[$this->getStatus()] ?? null;
-        }
-        if ($this->isPerformer($userId)) {
-            return self::ACTIONS_PERFORMER_MAP[$this->getStatus()] ?? null;
+        foreach ($this->getActions() as $action) {
+            if ($action::checkAccess($userId, $userRole, $this)) {
+                $result[] = $action;
+            }
         }
 
-        return self::ACTIONS_OTHER_MAP[$this->getStatus()] ?? null;
+        return $result ?? [];
     }
 
     public static function createTask(array $attributes): Tasks
     {
-        // TODO: нужен ли taskId при создании или он будет как инкремент в базе?
         $taskObject = new Tasks($attributes);
 
         return $taskObject;
