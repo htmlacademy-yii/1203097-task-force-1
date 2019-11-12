@@ -82,7 +82,7 @@ class Tasks
         return self::ACTIONS;
     }
 
-    public function getNextStatus($action): string
+    public function getNextStatus(string $action): string
     {
         if (!in_array($action, $this->getActions())) {
             throw new Exception('unknown action');
@@ -118,7 +118,6 @@ class Tasks
 
     public function getAvailableActions(int $userId, string $userRole): array
     {
-        // TODO: $userRole не используется, но требуется в задании
         // TODO: accept должен быть только если есть отклики
         // TODO: добавить проверку что нельзя откликаться несколько раз
         foreach ($this->getActions() as $action) {
