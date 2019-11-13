@@ -1,6 +1,8 @@
 <?php
 namespace TaskForce\Actions;
 
+use TaskForce\Exceptions\TaskForceException;
+
 class AvailableActions
 {
     const STATUS_NEW = 'new';
@@ -37,6 +39,12 @@ class AvailableActions
     const ROLE_PERFORMER = 'performer';
     const ROLE_OTHER = 'other';
 
+    const ROLES = [
+        self::ROLE_OWNER,
+        self::ROLE_PERFORMER,
+        self::ROLE_OTHER,
+    ];
+
     private $status;
     private $ownerId;
     private $performerId;
@@ -44,6 +52,14 @@ class AvailableActions
 
     public function __construct(string $status, int $ownerId, ?int $performerId, string $dateClose)
     {
+        if (!in_array($status, self::STATUSES)) {
+            throw new TaskForceException('unknown status');
+        }
+
+        if ($ownerId < 0 || $performerId < 0) {
+            throw new TaskForceException('ownerId and performerId can\'t be < 0');
+        }
+
         $this->status = $status;
         $this->ownerId = $ownerId;
         $this->performerId = $performerId;
@@ -78,7 +94,11 @@ class AvailableActions
     public function getNextStatus(string $action): string
     {
         if (!in_array($action, $this->getActions())) {
-            throw new \Exception('unknown action');
+            throw new TaskForceException('unknown action');
+        }
+
+        if (!class_exists($action)) {
+            throw new TaskForceException('unknown class');
         }
 
         return self::ACTION_STATUS_MAP[$action] ?? $this->status;
@@ -86,7 +106,19 @@ class AvailableActions
 
     public function getAvailableActions(int $userId, string $userRole): array
     {
+        if (!in_array($userRole, self::ROLES)) {
+            throw new TaskForceException('unknown user role');
+        }
+
         foreach ($this->getActions() as $action) {
+            if (!class_exists($action)) {
+                throw new TaskForceException('unknown class');
+            }
+
+            if (!method_exists($action, 'checkAccess')) {
+                throw new TaskForceException('unknown method');
+            }
+
             if ($action::checkAccess($userId, $userRole, $this)) {
                 $result[] = $action;
             }
