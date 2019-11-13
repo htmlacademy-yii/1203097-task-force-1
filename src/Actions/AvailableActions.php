@@ -78,7 +78,7 @@ class AvailableActions
     public function getNextStatus(string $action): string
     {
         if (!in_array($action, $this->getActions())) {
-            throw new Exception('unknown action');
+            throw new \Exception('unknown action');
         }
 
         return self::ACTION_STATUS_MAP[$action] ?? $this->status;

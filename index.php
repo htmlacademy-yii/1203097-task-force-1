@@ -11,10 +11,10 @@ require_once 'vendor/autoload.php';
 
 $strategy = new AvailableActions(AvailableActions::STATUS_NEW, 1 , null, '2019-12-31');
 
-assert($strategy->getNextStatus(AcceptAction::class) == AvailableActions::STATUS_PROCESSING, 'accept action');
-assert($strategy->getNextStatus(CancelAction::class) == AvailableActions::STATUS_CANCELLED, 'cancel action');
-assert($strategy->getNextStatus(RefuseAction::class) == AvailableActions::STATUS_FAILED, 'refuse action');
-assert($strategy->getNextStatus(FinishAction::class) == AvailableActions::STATUS_COMPLETED, 'finish action');
+assert($strategy->getNextStatus(AcceptAction::class) === AvailableActions::STATUS_PROCESSING, 'accept action');
+assert($strategy->getNextStatus(CancelAction::class) === AvailableActions::STATUS_CANCELLED, 'cancel action');
+assert($strategy->getNextStatus(RefuseAction::class) === AvailableActions::STATUS_FAILED, 'refuse action');
+assert($strategy->getNextStatus(FinishAction::class) === AvailableActions::STATUS_COMPLETED, 'finish action');
 
 //Статус new, id заказчика 1
 assert($strategy->getAvailableActions(1, AvailableActions::ROLE_OWNER) === [TaskForce\Actions\AcceptAction::class, TaskForce\Actions\CancelAction::class], 'Заказчик может отменить или принять');
@@ -27,6 +27,6 @@ assert($strategy->getAvailableActions(1, AvailableActions::ROLE_OWNER) === [Task
 assert($strategy->getAvailableActions(2, AvailableActions::ROLE_PERFORMER) === [TaskForce\Actions\RefuseAction::class, TaskForce\Actions\ChatAction::class], 'Исполнителю доступны чат и отказ от задачи');
 
 //Статус failed
-$strategy = new AvailableActions(AvailableActions::STATUS_FAILED, 1 , 2, '2019-12-31');;
+$strategy = new AvailableActions(AvailableActions::STATUS_FAILED, 1 , 2, '2019-12-31');
 assert($strategy->getAvailableActions(1, AvailableActions::ROLE_OWNER) === [], 'Заказчику ничего недоступно');
 assert($strategy->getAvailableActions(2, AvailableActions::ROLE_PERFORMER) === [], 'Исполнителю ничего недоступно');
