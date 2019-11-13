@@ -1,8 +1,6 @@
 <?php
 namespace TaskForce\Actions;
 
-use TaskForce\Main\Tasks;
-
 class RefuseAction extends AbstractAction
 {
     public static function getName() :string
@@ -15,8 +13,8 @@ class RefuseAction extends AbstractAction
         return 'refuse';
     }
 
-    public static function checkAccess(int $userId, string $userRole, Tasks $task) :bool
+    public static function checkAccess(int $userId, string $userRole, AvailableActions $strategy) :bool
     {
-        return $userId === $task->getPerformerId() && $task->getStatus() === Tasks::STATUS_PROCESSING;
+        return $userId === $strategy->getPerformerId() && $strategy->getStatus() === AvailableActions::STATUS_PROCESSING;
     }
 }

@@ -1,8 +1,6 @@
 <?php
 namespace TaskForce\Actions;
 
-use TaskForce\Main\Tasks;
-
 class ChatAction extends AbstractAction
 {
     public static function getName() :string
@@ -15,9 +13,9 @@ class ChatAction extends AbstractAction
         return 'chat';
     }
 
-    public static function checkAccess(int $userId, string $userRole, Tasks $task) :bool
+    public static function checkAccess(int $userId, string $userRole, AvailableActions $strategy) :bool
     {
         // TODO: нужна ли проверка что задание в статусе "выполняется" ?
-        return $task->getPerformerId() && in_array($userId, [$task->getOwnerId(), $task->getPerformerId()]) && $task->getStatus() === TASKS::STATUS_PROCESSING;
+        return $strategy->getPerformerId() && in_array($userId, [$strategy->getOwnerId(), $strategy->getPerformerId()]) && $strategy->getStatus() === AvailableActions::STATUS_PROCESSING;
     }
 }

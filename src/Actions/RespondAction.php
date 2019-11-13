@@ -1,8 +1,6 @@
 <?php
 namespace TaskForce\Actions;
 
-use TaskForce\Main\Tasks;
-
 class RespondAction extends AbstractAction
 {
     public static function getName() :string
@@ -15,8 +13,8 @@ class RespondAction extends AbstractAction
         return 'respond';
     }
 
-    public static function checkAccess(int $userId, string $userRole, Tasks $task) :bool
+    public static function checkAccess(int $userId, string $userRole, AvailableActions $strategy) :bool
     {
-        return $task->getStatus() === Tasks::STATUS_NEW && $task->getOwnerId() !== $userId && $userRole === Tasks::ROLE_PERFORMER;
+        return $strategy->getStatus() === AvailableActions::STATUS_NEW && $strategy->getOwnerId() !== $userId && $userRole === AvailableActions::ROLE_PERFORMER;
     }
 }
