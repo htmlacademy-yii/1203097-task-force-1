@@ -7,7 +7,7 @@ require_once 'vendor/autoload.php';
 $data = [
     [
         'src' => 'data/categories.csv',
-        'dst' => 'categories.sql',
+        'dst' => 'sql/categories.sql',
         'table' => 'categories',
         'header' => ['name' => 'text', 'icon' => 'text'],
         'add_fields' => [],
@@ -15,7 +15,7 @@ $data = [
 
     [
         'src' => 'data/cities.csv',
-        'dst' => 'cities.sql',
+        'dst' => 'sql/cities.sql',
         'table' => 'cities',
         'header' => ['city_name' => 'text', 'lat' => 'number', 'lng' => 'number'],
         'add_fields' => [],
@@ -23,7 +23,7 @@ $data = [
 
     [
         'src' => 'data/users.csv',
-        'dst' => 'users.sql',
+        'dst' => 'sql/users.sql',
         'table' => 'users',
         'header' => ['email' => 'text', 'name' => 'text', 'password' => 'text', 'created_at' => 'text'],
         'add_fields' => [],
@@ -31,7 +31,7 @@ $data = [
 
     [
         'src' => 'data/profiles.csv',
-        'dst' => 'user_profiles.sql',
+        'dst' => 'sql/user_profiles.sql',
         'table' => 'user_profiles',
         'header' => ['address' => 'text', 'birthday' => 'text', 'information' => 'text', 'contact_phone' => 'text', 'contact_skype' => 'text'],
         'add_fields' =>
@@ -43,7 +43,7 @@ $data = [
 
     [
         'src' => 'data/tasks.csv',
-        'dst' => 'tasks.sql',
+        'dst' => 'sql/tasks.sql',
         'table' => 'tasks',
         'header' =>
             [
@@ -62,7 +62,7 @@ $data = [
 
     [
         'src' => 'data/opinions.csv',
-        'dst' => 'reviews.sql',
+        'dst' => 'sql/reviews.sql',
         'table' => 'reviews',
         'header' => ['created_at' => 'text', 'score' => 'number', 'message' => 'text'],
         'add_fields' =>
@@ -76,7 +76,7 @@ $data = [
 
     [
         'src' => 'data/replies.csv',
-        'dst' => 'responses.sql',
+        'dst' => 'sql/responses.sql',
         'table' => 'responses',
         'header' => ['created_at' => 'text', 'task_id' => 'number', 'comment' => 'text'],
         'add_fields' =>
@@ -91,4 +91,36 @@ $data = [
 foreach ($data as $instance) {
     $converter = new Converter($instance['src'], $instance['dst'], $instance['table'], $instance['header'], $instance['add_fields']);
     $converter->convert();
+}
+
+$dh_host = 'localhost';
+$db_user = 'root';
+$db_password = '';
+$db_name = 'taskforce';
+$db_schema = 'sql/taskforce.sql';
+
+$mysqli = new mysqli($dh_host, $db_user, $db_password, $db_name);
+if (mysqli_connect_errno()) {
+    printf("Connect failed: %s\n", mysqli_connect_error());
+    exit();
+}
+
+$files = array_column($data, 'dst');
+array_unshift($files, $db_schema);
+
+// import sql files
+foreach ($files as $file) {
+    $sql = file_get_contents($file);
+    echo "importing $file: ";
+    $message = $mysqli->multi_query($sql) ? "success" : "error " . $mysqli->error;
+    echo "$message\n";
+
+    do {
+        $mysqli->use_result();
+    } while ($mysqli->more_results() && $mysqli->next_result());
+
+    // delete imported sql file
+    if ($file !== $db_schema) {
+        unlink($file);
+    }
 }
