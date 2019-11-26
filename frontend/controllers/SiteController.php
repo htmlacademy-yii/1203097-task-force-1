@@ -15,6 +15,8 @@ use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
 use yii\db\Query;
+use frontend\models\Users;
+use frontend\models\UserProfiles;
 
 /**
  * Site controller
@@ -261,23 +263,19 @@ class SiteController extends Controller
 
     public function actionTest()
     {
-        $model = new LoginForm();
-
+        /*
         $query = new Query();
         $query->select(['u.id', 'u.name','p.birthday'])->from('users u')
             ->join('INNER JOIN', 'user_profiles p', 'u.id = p.user_id')
             ->orderBy(['p.birthday' => SORT_ASC]);
-        //->where(['position' => 'Менеджер'])->limit(10);
-        // выполнить запрос и получить результат в виде двухмерного массива
         $rows = $query->all();
-/*
-        foreach ($rows as $row) {
-            print($row['name']);
-        }
-*/
+        */
+
+        $user = Users::findOne(1);
+        $profile = $user->userProfiles;
 
         return $this->render('test', [
-            'model' => $rows
+            'profile' => $profile
         ]);
 
     }
