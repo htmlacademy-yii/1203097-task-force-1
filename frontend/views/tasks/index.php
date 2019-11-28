@@ -2,7 +2,8 @@
 
 /**
  * @var $this yii\web\View
- * @var $tasks
+ * @var $tasks frontend\models\Tasks
+ * array $tasks contains some tasks and related category/city info
  */
 
 use yii\helpers\Html;
