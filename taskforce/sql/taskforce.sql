@@ -7,7 +7,7 @@
 #
 # Host: localhost (MySQL 5.7.27)
 # Database: taskforce
-# Generation Time: 2019-11-18 10:47:44 +0000
+# Generation Time: 2019-12-05 20:36:13 +0000
 # ************************************************************
 
 
@@ -175,6 +175,7 @@ CREATE TABLE `tasks` (
   KEY `city_id` (`city_id`),
   KEY `owner_user_id` (`owner_user_id`),
   KEY `performer_user_id` (`performer_user_id`),
+  FULLTEXT KEY `name` (`name`),
   CONSTRAINT `tasks_ibfk_3` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `tasks_ibfk_4` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `tasks_ibfk_5` FOREIGN KEY (`owner_user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE,
