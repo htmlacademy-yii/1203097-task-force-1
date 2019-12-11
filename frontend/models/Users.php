@@ -17,14 +17,14 @@ use Yii;
  * @property Notifications[] $notifications
  * @property Responses[] $responses
  * @property Reviews[] $reviews
- * @property Reviews[] $reviews0
+ * @property Reviews[] $reviewsByPerformer
  * @property Tasks[] $tasks
  * @property Tasks[] $tasks0
  * @property UserCategories[] $userCategories
  * @property UserFavorites[] $userFavorites
  * @property UserFavorites[] $userFavorites0
  * @property UserJobPhotos[] $userJobPhotos
- * @property UserProfiles[] $userProfiles
+ * @property UserProfiles[] $userProfile
  */
 class Users extends \yii\db\ActiveRecord
 {
@@ -98,7 +98,7 @@ class Users extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getReviews0()
+    public function getReviewsByPerformer()
     {
         return $this->hasMany(Reviews::className(), ['performer_id' => 'id']);
     }
@@ -154,8 +154,62 @@ class Users extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getUserProfiles()
+    public function getUserProfile()
     {
-        return $this->hasMany(UserProfiles::class, ['user_id' => 'id']);
+        return $this->hasOne(UserProfiles::class, ['user_id' => 'id']);
+    }
+
+    /**
+     * @return float
+     */
+    public function getUserRating()
+    {
+        return number_format($this->getReviewsByPerformer()->average('score'),2);
+    }
+
+    /**
+     * @param float $rating
+     * @return string
+     */
+    public function getUserRatingHtml(float $rating)
+    {
+        $result = '';
+        for ($i = 1; $i <= 5; $i += 1) {
+            $result .= ($i <= $rating) ? '<span></span>' : '<span class="star-disabled"></span>';
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUserReviewsCount()
+    {
+        return $this->getReviewsByPerformer()->count();
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserReviewsCountFormatted()
+    {
+        return Yii::$app->i18n->format('{n, plural, =0{# отзывов} =1{# отзыв} one{# отзыв} few{# отзыва} many{# отзывов} other{# отзывов}}', ['n' => $this->getUserReviewsCount()], 'ru_RU');
+    }
+
+    /**
+     * @return int
+     */
+    public function getUserTasksCount()
+    {
+        return $this->getTasks()->count();
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserTasksCountFormatted()
+    {
+        return Yii::$app->i18n->format('{n, plural, =0{# заказов} =1{# заказ} one{# заказ} few{# заказа} many{# заказов} other{# заказов}}', ['n' => $this->getUserTasksCount()], 'ru_RU');
     }
 }
