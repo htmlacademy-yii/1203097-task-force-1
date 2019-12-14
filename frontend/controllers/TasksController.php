@@ -6,6 +6,7 @@ use frontend\models\Tasks;
 use frontend\models\FormSearchTask;
 use Yii;
 use yii\db\Expression;
+use yii\web\NotFoundHttpException;
 
 class TasksController extends Controller
 {
@@ -59,7 +60,24 @@ class TasksController extends Controller
 
         return $this->render('index', [
             'tasks' => $tasks,
-            'model' => $model
+            'model' => $model,
+        ]);
+    }
+
+    public function actionShow($id)
+    {
+        $task = Tasks::find()
+            ->where(['tasks.id' => $id])
+            ->joinWith('category')
+            ->joinWith('ownerUser')
+            ->one();
+
+        if (!$task) {
+            throw new NotFoundHttpException;
+        }
+
+        return $this->render('show', [
+            'task' => $task,
         ]);
     }
 }

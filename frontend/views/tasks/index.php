@@ -21,7 +21,7 @@ Yii::$app->formatter->language = 'ru-RU';
         <?php $taskLocation = isset($task->city->city_name) ? "{$task->city->city_name}, {$task->address}" : "Удаленная работа";?>
         <div class="new-task__card">
             <div class="new-task__title">
-                <a href="#" class="link-regular"><h2><?= Html::encode($task->name); ?></h2></a>
+                <a href="/task/view/<?= $task->id; ?>" class="link-regular"><h2><?= Html::encode($task->name); ?></h2></a>
                 <a  class="new-task__type link-regular" href="#"><p><?= Html::encode($task->category->name); ?></p></a>
             </div>
             <div class="new-task__icon new-task__icon--<?= Html::encode($task->category->icon); ?>"></div>
