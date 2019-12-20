@@ -8,7 +8,7 @@ use Yii;
 use yii\db\Expression;
 use yii\web\NotFoundHttpException;
 
-class TasksController extends Controller
+class TasksController extends AuthController
 {
     public function actionIndex()
     {
