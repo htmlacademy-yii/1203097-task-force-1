@@ -96,14 +96,7 @@ AppAsset::register($this);
                     <a href="#" class="link-regular">«Помочь с курсовой»</a>
                 </p>
             </div>
-            <?php
-            if ($id = \Yii::$app->user->getId()) {
-                $user = Users::find()
-                    ->where(['users.id' => $id])
-                    ->joinWith('userProfile')
-                    ->one();
-            }
-            ?>
+            <?php $user = $this->params['loggedUser']; ?>
             <div class="header__account">
                 <a class="header__account-photo">
                     <img src="<?= $user->userProfile->avatar; ?>"
