@@ -243,4 +243,17 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return Yii::$app->i18n->format('{n, plural, =0{# заказов} =1{# заказ} one{# заказ} few{# заказа} many{# заказов} other{# заказов}}', ['n' => $this->getUserTasksCount()], 'ru_RU');
     }
+
+    public static function getLoggedUser()
+    {
+        $user = null;
+        if ($id = \Yii::$app->user->getId()) {
+            $user = Users::find()
+                ->where(['users.id' => $id])
+                ->joinWith('userProfile')
+                ->one();
+        }
+
+        return $user;
+    }
 }
