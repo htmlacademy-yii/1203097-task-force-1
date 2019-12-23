@@ -5,8 +5,6 @@
 
 use yii\helpers\Html;
 use frontend\assets\AppAsset;
-use yii\bootstrap\Modal;
-use yii\widgets\ActiveForm;
 
 AppAsset::register($this);
 ?>
@@ -57,10 +55,8 @@ AppAsset::register($this);
                 <p>Работа там, где ты!</p>
             </div>
             <div class="header__account--index">
-                <a href="#" class="header__account-enter" onclick="$test()">
+                <a href="#" class="header__account-enter">
                     <span data-toggle='modal' data-target='#sign-in'>Вход</span></a>
-
-
 
                 или
                 <a href="signup.html" class="header__account-registration">
@@ -71,7 +67,6 @@ AppAsset::register($this);
     </header>
     <main>
         <div class="landing-container">
-
 
             <?= $content ?>
 
@@ -121,48 +116,6 @@ AppAsset::register($this);
             </div>
         </div>
     </footer>
-
-    <?php $model = $this->params['model']; ?>
-    <?php  Modal::begin([
-        'id' => 'sign-in',
-        'size' => 'modal-sm',
-        'bodyOptions' => ['class' => 'form-modal'],
-        'closeButton' => false,
-        'header' => null,
-    ]); ?>
-    <h2>Вход на сайт</h2>
-    <?php $form = ActiveForm::begin([
-        'id' => 'form-login',
-        'enableAjaxValidation' => true,
-        'enableClientValidation' => false,
-    ]); ?>
-    <p>
-        <?= $form->field($model, 'email', [
-            'template' => "{label}\n{input}\n{error}",
-            'options' => [
-                'tag' => false,
-            ]
-        ])->textInput([
-            'class' => 'enter-form-email input input-middle',
-            'type' => 'email',
-        ])->label(null, ['class' => 'form-modal-description']);?>
-    </p>
-    <p>
-        <?= $form->field($model, 'password', [
-            'template' => "{label}\n{input}\n{error}",
-            'options' => [
-                'tag' => false,
-            ]
-        ])->textInput([
-            'class' => 'enter-form-email input input-middle',
-            'type' => 'password'
-        ])->label(null, ['class' => 'form-modal-description']);
-        ?>
-    </p>
-    <button class="button" type="submit">Войти</button>
-    <?php ActiveForm::end(); ?>
-    <button class="form-modal-close" data-dismiss="modal" type="button">Закрыть</button>
-    <?php  Modal::end(); ?>
 
 </div>
 <div class="overlay"></div>

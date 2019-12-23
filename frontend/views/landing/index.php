@@ -3,15 +3,23 @@
 /**
  * @var $this yii\web\View
  * @var $newTasks array frontend\models\Tasks
- * array $tasks contains some tasks and related category/city info
+ * array newTasks contains 4 last tasks and related category/city info
+ * @var $model frontend\models\FormLogin
  */
 
 use yii\helpers\Html;
 use yii\helpers\BaseStringHelper;
+use yii\widgets\ActiveForm;
+use yii\bootstrap\Modal;
 
 $this->title = 'TaskForce Лендинг';
 Yii::$app->formatter->language = 'ru-RU';
 
+$this->registerCss(".help-block { color: red; }");
+$this->registerJsFile(
+    '@web/validation-login.js',
+    ['depends' => [\yii\web\JqueryAsset::className()]]
+);
 ?>
 <!-- конфликт стилей с бутстрапом-->
 <div class="landing-top" style="box-sizing:content-box">
@@ -127,3 +135,47 @@ Yii::$app->formatter->language = 'ru-RU';
         <button onclick="window.location.href = '/tasks';" type="button" class="button red-button">смотреть все задания</button>
     </div>
 </div>
+
+<?php  Modal::begin([
+    'id' => 'sign-in',
+    'size' => 'modal-sm',
+    'bodyOptions' => ['class' => 'form-modal'],
+    'closeButton' => false,
+    'header' => null,
+]); ?>
+<h2>Вход на сайт</h2>
+
+<?php $form = ActiveForm::begin([
+    'id' => 'form-login',
+    'enableAjaxValidation' => false,
+    'enableClientValidation' => false,
+
+]); ?>
+<p>
+    <?= $form->field($model, 'email', [
+        'template' => "{label}\n{input}\n{error}",
+        'options' => [
+            'tag' => false,
+        ]
+    ])->textInput([
+        'class' => 'enter-form-email input input-middle',
+        'type' => 'email',
+    ])->label(null, ['class' => 'form-modal-description']);?>
+</p>
+<p>
+    <?= $form->field($model, 'password', [
+        'template' => "{label}\n{input}\n{error}",
+        'options' => [
+            'tag' => false,
+        ]
+    ])->textInput([
+        'class' => 'enter-form-email input input-middle',
+        'type' => 'password'
+    ])->label(null, ['class' => 'form-modal-description']);
+    ?>
+</p>
+<button class="button" type="submit">Войти</button>
+<?php ActiveForm::end(); ?>
+
+<button class="form-modal-close" data-dismiss="modal" type="button">Закрыть</button>
+<?php  Modal::end(); ?>
