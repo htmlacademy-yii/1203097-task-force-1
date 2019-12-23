@@ -1,12 +1,12 @@
 <?php
 namespace frontend\controllers;
 
-use yii\web\Controller;
 use frontend\models\Tasks;
 use frontend\models\FormSearchTask;
 use Yii;
 use yii\db\Expression;
 use yii\web\NotFoundHttpException;
+use frontend\models\Users;
 
 class TasksController extends AuthController
 {
@@ -58,6 +58,8 @@ class TasksController extends AuthController
 
         $tasks = $query->all();
 
+        $this->view->params['loggedUser'] = Users::getLoggedUser();
+
         return $this->render('index', [
             'tasks' => $tasks,
             'model' => $model,
@@ -75,6 +77,8 @@ class TasksController extends AuthController
         if (!$task) {
             throw new NotFoundHttpException;
         }
+
+        $this->view->params['loggedUser'] = Users::getLoggedUser();
 
         return $this->render('show', [
             'task' => $task,
