@@ -35,7 +35,6 @@ class LandingController extends Controller
             }
         }
 
-        $this->view->params['model'] = $model;
         $newTasks = Tasks::find()
             ->joinWith('category')
             ->orderBy(['created_at' => SORT_DESC])
@@ -43,6 +42,7 @@ class LandingController extends Controller
             ->all();
         return $this->render('index', [
             'newTasks' => $newTasks,
+            'model' => $model,
         ]);
     }
 
