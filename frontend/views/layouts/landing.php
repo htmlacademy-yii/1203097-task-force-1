@@ -4,12 +4,7 @@
 /* @var $content string */
 
 use yii\helpers\Html;
-use yii\bootstrap\Nav;
-use yii\bootstrap\NavBar;
-use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
-use common\widgets\Alert;
-use frontend\models\Users;
 
 AppAsset::register($this);
 ?>
@@ -20,16 +15,19 @@ AppAsset::register($this);
     <meta charset="<?= Yii::$app->charset ?>">
     <?php $this->registerCsrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
+    <?php $this->registerCss(".modal-content { border: 0; }"); ?>
     <?php $this->head() ?>
 </head>
-<body>
+
 <?php $this->beginBody() ?>
+<body class="landing">
 <div class="table-layout">
-    <header class="page-header">
-        <div class="main-container page-header__container">
-            <div class="page-header__logo">
-                <a href="/">
-                    <svg class="page-header__logo-image" id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1634 646.35">
+    <!-- конфликт стилей с бутстрапом-->
+    <header class=" page-header--index" style="display:table-row">
+        <div class="main-container page-header__container page-header__container--index">
+            <div class="page-header__logo--index">
+                <a>
+                    <svg class="logo-image--index" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1634 646.35">
                         <title>taskforce_logo2-01</title>
                         <g>
                             <g>
@@ -54,78 +52,23 @@ AppAsset::register($this);
                         </g>
                     </svg>
                 </a>
+                <p>Работа там, где ты!</p>
             </div>
-            <div class="header__nav">
-                <ul class="header-nav__list site-list">
-                    <li class="site-list__item">
-                        <a href="#">Задания</a>
-                    </li>
-                    <li class="site-list__item">
-                        <a href="#">Исполнители</a>
-                    </li>
-                    <li class="site-list__item">
-                        <a href="#">Создать задание</a>
-                    </li>
-                    <li class="site-list__item">
-                        <a>Мой профиль</a>
-                    </li>
-                </ul>
-            </div>
-            <div class="header__town">
-                <select class="multiple-select input town-select" size="1" name="town[]">
-                    <option value="Moscow">Москва</option>
-                    <option selected value="SPB">Санкт-Петербург</option>
-                    <option value="Krasnodar">Краснодар</option>
-                    <option value="Irkutsk">Иркутск</option>
-                    <option value="Vladivostok">Владивосток</option>
-                </select>
-            </div>
-            <div class="header__lightbulb"></div>
-            <div class="lightbulb__pop-up">
-                <h3>Новые события</h3>
-                <p class="lightbulb__new-task lightbulb__new-task--message">
-                    Новое сообщение в чате
-                    <a href="#" class="link-regular">«Помочь с курсовой»</a>
-                </p>
-                <p class="lightbulb__new-task lightbulb__new-task--executor">
-                    Выбран исполнитель для
-                    <a href="#" class="link-regular">«Помочь с курсовой»</a>
-                </p>
-                <p class="lightbulb__new-task lightbulb__new-task--close">
-                    Завершено задание
-                    <a href="#" class="link-regular">«Помочь с курсовой»</a>
-                </p>
-            </div>
-            <?php $user = $this->params['loggedUser']; ?>
-            <div class="header__account">
-                <a class="header__account-photo">
-                    <img src="<?= $user->userProfile->avatar; ?>"
-                         width="43" height="44"
-                         alt="Аватар пользователя">
+            <div class="header__account--index">
+                <a href="#" class="header__account-enter">
+                    <span data-toggle='modal' data-target='#sign-in'>Вход</span></a>
+
+                или
+                <a href="signup.html" class="header__account-registration">
+                    Регистрация
                 </a>
-                <span class="header__account-name">
-                 <?= Html::encode($user->name); ?>
-                </span>
-            </div>
-            <div class="account__pop-up">
-                <ul class="account__pop-up-list">
-                    <li>
-                        <a href="#">Мои задания</a>
-                    </li>
-                    <li>
-                        <a href="#">Настройки</a>
-                    </li>
-                    <li>
-                        <a href="/landing/logout">Выход</a>
-                    </li>
-                </ul>
             </div>
         </div>
     </header>
-    <main class="page-main">
-        <div class="main-container page-container">
+    <main>
+        <div class="landing-container">
 
-        <?= $content ?>
+            <?= $content ?>
 
         </div>
     </main>
@@ -164,7 +107,7 @@ AppAsset::register($this);
                 </ul>
             </div>
             <div class="page-footer__copyright">
-                <a>
+                <a href="https://htmlacademy.ru">
                     <img class="copyright-logo"
                          src="/img/academy-logo.png"
                          width="185" height="63"
@@ -173,60 +116,7 @@ AppAsset::register($this);
             </div>
         </div>
     </footer>
-    <section class="modal response-form form-modal">
-        <h2>Отклик на задание</h2>
-        <form action="#" method="post">
-            <p>
-                <label class="form-modal-description" for="response-payment">Ваша цена</label>
-                <input class="response-form-payment input input-middle input-money" type="text" name="response-payment" id="response-payment">
-            </p>
-            <p>
-                <label class="form-modal-description" for="response-comment">Комментарий</label>
-                <textarea class="input textarea" rows="4" id="response-comment" name="response-comment" placeholder="Place your text"></textarea>
-            </p>
-            <button class="button modal-button" type="submit">Отправить</button>
-        </form>
-        <button class="form-modal-close" type="button">Закрыть</button>
-    </section>
-    <section class="modal completion-form form-modal">
-        <h2>Завершение задания</h2>
-        <p class="form-modal-description">Задание выполнено?</p>
-        <form action="#" method="post">
-            <input class="visually-hidden completion-input completion-input--yes" type="radio" id="completion-radio--yes" name="completion" value="yes">
-            <label class="completion-label completion-label--yes" for="completion-radio--yes">Да</label>
-            <input class="visually-hidden completion-input completion-input--difficult" type="radio" id="completion-radio--yet" name="completion" value="difficulties">
-            <label  class="completion-label completion-label--difficult" for="completion-radio--yet">Возникли проблемы</label>
-            <p>
-                <label class="form-modal-description" for="completion-comment">Комментарий</label>
-                <textarea class="input textarea" rows="4" id="completion-comment" name="completion-comment" placeholder="Place your text"></textarea>
-            </p>
-            <p class="form-modal-description">
-                Оценка
-            <div class="feedback-card__top--name completion-form-star">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span class="star-disabled"></span>
-            </div>
-            </p>
-            <button class="button modal-button" type="submit">Отправить</button>
-        </form>
-        <button class="form-modal-close" type="button">Закрыть</button>
-    </section>
-    <section class="modal form-modal refusal-form">
-        <h2>Отказ от задания</h2>
-        <p>
-            Вы собираетесь отказаться от выполнения задания.
-            Это действие приведёт к снижению вашего рейтинга.
-            Вы уверены?
-        </p>
-        <button class="button__form-modal button"
-                type="button">Отмена</button>
-        <button class="button__form-modal refusal-button button"
-                type="button">Отказаться</button>
-        <button class="form-modal-close" type="button">Закрыть</button>
-    </section>
+
 </div>
 <div class="overlay"></div>
 
@@ -234,3 +124,4 @@ AppAsset::register($this);
 </body>
 </html>
 <?php $this->endPage() ?>
+

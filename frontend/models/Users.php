@@ -3,6 +3,7 @@
 namespace frontend\models;
 
 use Yii;
+use yii\web\IdentityInterface;
 
 /**
  * This is the model class for table "users".
@@ -26,8 +27,38 @@ use Yii;
  * @property UserJobPhotos[] $userJobPhotos
  * @property UserProfiles[] $userProfile
  */
-class Users extends \yii\db\ActiveRecord
+class Users extends \yii\db\ActiveRecord implements IdentityInterface
 {
+    public static function findIdentity($id)
+    {
+        return self::findOne($id);
+    }
+
+    public static function findIdentityByAccessToken($token, $type = null)
+    {
+        // TODO: Implement findIdentityByAccessToken() method.
+    }
+
+    public function getId()
+    {
+        return $this->getPrimaryKey();
+    }
+
+    public function getAuthKey()
+    {
+        // TODO: Implement getAuthKey() method.
+    }
+
+    public function validateAuthKey($authKey)
+    {
+        // TODO: Implement validateAuthKey() method.
+    }
+
+    public function validatePassword($password)
+    {
+        return \Yii::$app->security->validatePassword($password, $this->password);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -211,5 +242,18 @@ class Users extends \yii\db\ActiveRecord
     public function getUserTasksCountFormatted()
     {
         return Yii::$app->i18n->format('{n, plural, =0{# заказов} =1{# заказ} one{# заказ} few{# заказа} many{# заказов} other{# заказов}}', ['n' => $this->getUserTasksCount()], 'ru_RU');
+    }
+
+    public static function getLoggedUser()
+    {
+        $user = null;
+        if ($id = \Yii::$app->user->getId()) {
+            $user = Users::find()
+                ->where(['users.id' => $id])
+                ->joinWith('userProfile')
+                ->one();
+        }
+
+        return $user;
     }
 }

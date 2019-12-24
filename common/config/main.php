@@ -11,6 +11,7 @@ return [
             'showScriptName' => false,
             'enableStrictParsing' => false,
             'rules' => [
+                '/' => 'landing/index',
                 'tasks' => 'tasks/index',
                 'task/view/<id:\d+>' => 'tasks/show',
             ],
