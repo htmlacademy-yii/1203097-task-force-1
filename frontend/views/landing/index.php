@@ -21,6 +21,16 @@ $this->registerJsFile(
     ['depends' => [\yii\web\JqueryAsset::className()]]
 );
 ?>
+
+<?php if (Yii::$app->session->hasFlash('signup')): ?>
+    <div class="alert alert-success alert-dismissable">
+        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+        <h4><i class="icon fa fa-check"></i>
+            <?= Yii::$app->session->getFlash('signup') ?>
+        </h4>
+    </div>
+<?php endif; ?>
+
 <!-- конфликт стилей с бутстрапом-->
 <div class="landing-top" style="box-sizing:content-box">
     <h1>Работа для всех.<br>
